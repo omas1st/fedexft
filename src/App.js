@@ -1,25 +1,44 @@
-import logo from './logo.svg';
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider, AuthContext } from './context/AuthContext';
+import Navbar from './components/Navbar';
+import TrackingForm from './components/TrackingForm';
+import AdminLogin from './components/AdminLogin';
+import AdminPanel from './components/AdminPanel';
 import './App.css';
 
+const PrivateRoute = ({ children }) => {
+    const { isAuthenticated, loading } = React.useContext(AuthContext);
+    
+    if (loading) {
+        return <div>Loading...</div>;
+    }
+    
+    return isAuthenticated ? children : <Navigate to="/login" />;
+};
+
 function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+    return (
+        <AuthProvider>
+            <Router>
+                <div className="App">
+                    <Navbar />
+                    <Routes>
+                        <Route path="/" element={<TrackingForm />} />
+                        <Route path="/login" element={<AdminLogin />} />
+                        <Route 
+                            path="/admin" 
+                            element={
+                                <PrivateRoute>
+                                    <AdminPanel />
+                                </PrivateRoute>
+                            } 
+                        />
+                    </Routes>
+                </div>
+            </Router>
+        </AuthProvider>
+    );
 }
 
 export default App;
